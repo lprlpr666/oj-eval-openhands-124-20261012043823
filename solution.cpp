@@ -5,8 +5,8 @@ using namespace std;
 
 class LazySegmentTree {
 private:
-    vector<int> tree;
-    vector<int> lazy;
+    vector<long long> tree;
+    vector<long long> lazy;
     int n;
     
     void push(int node, int start, int end) {
@@ -20,7 +20,7 @@ private:
         }
     }
     
-    void updateRange(int node, int start, int end, int l, int r, int val) {
+    void updateRange(int node, int start, int end, int l, int r, long long val) {
         push(node, start, end);
         if (start > r || end < l) {
             return;
@@ -38,7 +38,7 @@ private:
         tree[node] = max(tree[2 * node], tree[2 * node + 1]);
     }
     
-    int queryRange(int node, int start, int end, int l, int r) {
+    long long queryRange(int node, int start, int end, int l, int r) {
         if (start > r || end < l) {
             return 0;
         }
@@ -47,8 +47,8 @@ private:
             return tree[node];
         }
         int mid = (start + end) / 2;
-        int left_max = queryRange(2 * node, start, mid, l, r);
-        int right_max = queryRange(2 * node + 1, mid + 1, end, l, r);
+        long long left_max = queryRange(2 * node, start, mid, l, r);
+        long long right_max = queryRange(2 * node + 1, mid + 1, end, l, r);
         return max(left_max, right_max);
     }
     
@@ -59,11 +59,11 @@ public:
         lazy.resize(4 * n, 0);
     }
     
-    void updateRange(int l, int r, int val) {
+    void updateRange(int l, int r, long long val) {
         updateRange(1, 0, n - 1, l, r, val);
     }
     
-    int queryRange(int l, int r) {
+    long long queryRange(int l, int r) {
         return queryRange(1, 0, n - 1, l, r);
     }
 };
@@ -71,6 +71,17 @@ public:
 int main() {
     int x, k, p;
     scanf("%d %d %d", &x, &k, &p);
+    
+    // Special case: if there's only 1 station, no journeys are possible
+    if (x == 1) {
+        for (int i = 0; i < p; i++) {
+            int u, v, n;
+            scanf("%d %d %d", &u, &v, &n);
+            // Any journey from station 1 to 1 has no segments, so it's always possible
+            printf("T\n");
+        }
+        return 0;
+    }
     
     // We only need x-1 segments since there are x stations
     LazySegmentTree st(x - 1);
@@ -85,7 +96,7 @@ int main() {
         int end_seg = v - 2;
         
         // Check maximum seat usage in the range
-        int max_usage = st.queryRange(start_seg, end_seg);
+        long long max_usage = st.queryRange(start_seg, end_seg);
         
         if (max_usage + n <= k) {
             // Order can be fulfilled, update all segments
